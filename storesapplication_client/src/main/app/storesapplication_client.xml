@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-property-placeholder="http://www.mulesoft.org/schema/mule/secure-property-placeholder"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/secure-property-placeholder http://www.mulesoft.org/schema/mule/secure-property-placeholder/current/mule-secure-property-placeholder.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+    <http:request-config name="HTTP_Request_Configuration" host="${http.server.host}" port="${http.server.port}" doc:name="HTTP Request Configuration"/>
+    <http:listener-config name="HTTP_Listener_Configuration" host="${http.host}" port="${http.port}" doc:name="HTTP Listener Configuration"/>
+    <secure-property-placeholder:config name="Secure_Property_Placeholder" key="${mulevault.key}" location="classpath:default.properties" doc:name="Secure Property Placeholder" ignoreResourceNotFound="true"/>
+    
+    <flow name="storesapplication_clientFlow_GET">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/getStores" doc:name="HTTP"/>
+        <logger level="INFO" doc:name="Consuming the service from server" message="Consuming web service"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/api/stores" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:query-param paramName="storeNumber" value="100896"/>
+            </http:request-builder>
+        </http:request>
+        <logger level="INFO" doc:name="Server Response for retrieve stores"/>
+    </flow>
+    <flow name="storesapplication_clientFlow_POST">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/createStore" doc:name="HTTP"/>
+        <logger level="INFO" doc:name="Consuming the service from server"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+    "locationCode": "100418",
+    "storeNumber":"T103256",
+    "storeManager":"Curlon",
+    "status": "active"
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <http:request config-ref="HTTP_Request_Configuration" path="/api/stores" method="POST" doc:name="HTTP">
+        </http:request>
+        <logger level="INFO" doc:name="Server Response for Creating stores"/>
+    </flow>
+</mule>

@@ -1,0 +1,41 @@
+#%RAML 1.0
+title: Sample Stores Application
+version: v1.0
+protocols: HTTPS
+mediaType: application/json
+baseUri: http://0.0.0.0:8082/
+
+/stores:
+  get:
+    description: |
+      Returns a list of active stores that satisfies the required query parameters.
+      
+      The query predicates are conjunctive and they are evaluated as a matrix.
+      
+    queryParameters:  
+      storeNumber:
+        type: string
+        required: true
+        example: T103232
+        description: |
+          Filter for participating store by a Store Number
+    responses:
+      200:
+        description: |
+             A store with the given store number is returned back
+        body:
+          example: !include examples/store-sample-retrieve.json
+   
+  post:
+    description: |
+      Creates a new store if not existing
+    body:
+      application/json:
+        example: !include examples/store-sample-create.json
+    responses:
+      200:
+        description: |
+             A new store is created and message with store created successfully should be back
+        body:
+          example: {"message":"Store created successfully"}
+        
